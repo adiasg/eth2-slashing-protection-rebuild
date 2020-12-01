@@ -5,7 +5,7 @@ This repository contains a script to recover Eth2 validator slashing protection 
 :bangbang:**Disclaimer**: *Absolutely no warranties. Use at your own risk.*:bangbang:
 
 ## Overview
-The script currently only regenerates the attestation component of the slashing protection file.
+The script currently only regenerates the attestation component of the slashing protection file. The block protection component will be filled with something that prevents signing any blocks that are older than the previous slot. 
 
 The slashing protection information is generated in the following way:
 - Parse entire subtree descending from last finalized block
