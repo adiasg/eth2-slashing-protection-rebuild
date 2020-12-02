@@ -12,7 +12,7 @@ The `future_only` method generates slashing protection information in a way that
 
 This method will make a single entry each in the attestation slashing protection and block slashing protection items. The items will be generated in the following manner:
 - Attestation Slashing Protection:
-  - `source_epoch`: Finalized epoch
+  - `source_epoch`: Current justified epoch
   - `target_epoch`: Current epoch
 - Block Slashing Protection:
   - `slot`: Current slot
@@ -23,15 +23,15 @@ This prevents the validator from making attestations in the current epoch, and b
 The method currently only regenerates the attestation component of the slashing protection file. The block protection item will be filled with the current slot.
 
 The slashing protection information is generated in the following way:
-- Parse entire subtree descending from last finalized block
+- Parse entire subtree descending from last justified block
 - If signed attestations are present, then identify the attestation with the *largest target epoch* that the validator has signed. Then use the source epoch and target epoch values from that attestation to make a single entry in the `"signed_attestations"` field of the slashing protection file.
-- If no signed attestations are found in this subtree, make a single entry in the `"signed_attestations"` field of the slashing protection file with `"source_epoch"` and `"target_epoch"` set to the last finalized epoch.
+- If no signed attestations are found in this subtree, make a single entry in the `"signed_attestations"` field of the slashing protection file with `"source_epoch"` and `"target_epoch"` set to the current justified epoch.
 
 ### Assumptions
 - The validator is offline while running this script.
 - This script is run on a machine with accurate system time.
 - The validator has always been using a validator client with accurate system time.
-- There is only one finalized chain.
+- The current justified checkpoint epoch never decreases.
 
 ## Install
 
@@ -63,4 +63,4 @@ optional arguments:
                         preferred log level
 ```
 
-The script will write to a `protection-interchange.json` file. This file can be imported into an Eth2 validator client at startup to populate the client-specific slashing protection database.
+The script will write to a `protection-file.json` file. This file can be imported into an Eth2 validator client at startup to populate the client-specific slashing protection database.

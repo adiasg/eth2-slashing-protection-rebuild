@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 import httpx
 import json
@@ -88,7 +90,7 @@ def generate_validator_protection_json(validator_pubkey, att_source_epoch, att_t
 def write_protection_file(genesis_validators_root, validator_protection_info):
     # Write the validator protection information items to a protection file in interchange format version 5
     # https://eips.ethereum.org/EIPS/eip-3076
-    protection_file = "protection-interchange.json"
+    protection_file = "protection-file.json"
     protection_data = []
     interchange_json = {
                          "metadata": {
@@ -135,11 +137,11 @@ if METHOD == "future_only":
     current_slot = (current_time - genesis_time) // SECONDS_PER_SLOT
     current_epoch = compute_epoch_at_slot(current_slot)
     finality_checkpoints = query_eth2_api("/eth/v1/beacon/states/head/finality_checkpoints")
-    finalized_epoch = int(finality_checkpoints["finalized"]["epoch"])
-    logging.info(f'Current chain information - Slot: {current_slot}, Epoch: {current_epoch}, Finalized Epoch: {finalized_epoch}')
+    justified_epoch = int(finality_checkpoints["current_justified"]["epoch"])
+    logging.info(f'Current chain information - Slot: {current_slot}, Epoch: {current_epoch}, Current Justified Epoch: {justified_epoch}')
 
-    # Set the source and target epoch for attestation slashing protection to the finalized epoch
-    att_source_epoch = finalized_epoch
+    # Set the source and target epoch for attestation slashing protection to the justified epoch
+    att_source_epoch = justified_epoch
     att_target_epoch = current_epoch
     logging.info(f'Plugging in fake Attestation with Source Epoch: {att_source_epoch}, Target Epoch: {att_target_epoch}')
     # Set the block slot for block slashing protection to the current slot
@@ -206,7 +208,7 @@ def get_signed_attestations(block, head_state, validator_index, committee_cache,
     return signed_attestations
 
 
-def process_chain(head, finalized_epoch, processed_blocks, best_attestations_in_chains, validator_index):
+def process_chain(head, justified_epoch, processed_blocks, best_attestations_in_chains, validator_index):
     logging.info(f"Processing chain from head: {head}")
     head_root = head["root"]
     # The below block header fetching might cause problems sometimes
@@ -223,7 +225,7 @@ def process_chain(head, finalized_epoch, processed_blocks, best_attestations_in_
     # Initiaize loop variables
     current_block_root = head_root
     block = fetch_block(current_block_root)
-    while current_block_root not in processed_blocks and block.slot > finalized_epoch * SLOTS_PER_EPOCH:
+    while current_block_root not in processed_blocks and block.slot > justified_epoch * SLOTS_PER_EPOCH:
         logging.info(f'Processing Block - Slot: {block.slot}, Root: {current_block_root}')
         signed_attestations = get_signed_attestations(block, head_state, validator_index, committee_cache, head)
         if signed_attestations:
@@ -244,8 +246,8 @@ def process_chain(head, finalized_epoch, processed_blocks, best_attestations_in_
         block = fetch_block(current_block_root)
     if current_block_root in processed_blocks:
         logging.debug(f'Block - Slot: {block.slot}, Root: {current_block_root} was already processed')
-    elif block.slot <= finalized_epoch * SLOTS_PER_EPOCH:
-        logging.debug(f'Block - Slot: {block.slot}, Root: {current_block_root} is not higher than Finalized Slot: {finalized_epoch * SLOTS_PER_EPOCH}')
+    elif block.slot <= justified_epoch * SLOTS_PER_EPOCH:
+        logging.debug(f'Block - Slot: {block.slot}, Root: {current_block_root} is not higher than Justified Slot: {justified_epoch * SLOTS_PER_EPOCH}')
 
 
 validator_index = VAL_INDEX[0]
@@ -257,21 +259,21 @@ finality_checkpoints_before = query_eth2_api("/eth/v1/beacon/states/head/finalit
 heads = query_eth2_api("/eth/v1/debug/beacon/heads")
 finality_checkpoints = query_eth2_api("/eth/v1/beacon/states/head/finality_checkpoints")
 
-if finality_checkpoints_before["finalized"] != finality_checkpoints["finalized"]:
-    logging.critical("The finalized block changed while in the middle of fetching data from the Eth2 node. "
-                    f'The old finalized checkpoint was: {finality_checkpoints_before["finalized"]}, and '
-                    f'the new finalized checkpoint is: {finality_checkpoints["finalized"]} '
+if finality_checkpoints_before["current_justified"] != finality_checkpoints["current_justified"]:
+    logging.critical("The current justified block changed while in the middle of fetching data from the Eth2 node. "
+                    f'The old current justified checkpoint was: {finality_checkpoints_before["current_justified"]}, and '
+                    f'the new current justified checkpoint is: {finality_checkpoints["current_justified"]} '
                     "To safeguard against processing inconsistent data, the program will exit. "
                     "Try running this script again.")
     exit(1)
 
-finalized_epoch = int(finality_checkpoints["finalized"]["epoch"])
+justified_epoch = int(finality_checkpoints["current_justified"]["epoch"])
 processed_blocks = []
 best_attestations_in_chains = []
 
 sorted(heads, key=lambda head: int(head["slot"]), reverse=True)
 for head in heads:
-    process_chain(head, finalized_epoch, processed_blocks, best_attestations_in_chains, validator_index)
+    process_chain(head, justified_epoch, processed_blocks, best_attestations_in_chains, validator_index)
     best_attestation = max(best_attestations_in_chains, key=lambda att: att.data.target.epoch)
     if compute_epoch_at_slot(best_attestation.data.slot) > compute_epoch_at_slot(int(head["slot"])):
         break
@@ -282,8 +284,8 @@ if best_attestations_in_chains:
 else:
     logging.info("No attestations from this validator were found in the sub-tree rooted at the last finalized block.")
     best_attestation = Attestation()
-    best_attestation.data.source.epoch = finalized_epoch
-    best_attestation.data.target.epoch = finalized_epoch
+    best_attestation.data.source.epoch = justified_epoch
+    best_attestation.data.target.epoch = justified_epoch
     logging.info(f'Plugging in fake Attestation with Source Epoch: {best_attestation.data.source.epoch}, Target Epoch: {best_attestation.data.target.epoch}')
 
 logging.info("This program does not rebuild block protection history yet. The highest known head slot will be plugged into the block protection component.")
