@@ -19,7 +19,7 @@ parser.add_argument("--eth2-api", type=str, required=True,
 parser.add_argument("--method", type=str, required=True,
                     choices=["future_only", "parse_chain"],
                     help="method used to rebuild the slashing protection information. "
-                    'The "parse_chain" option is experimental, and must be used with the "--validator-index" argument with a single validator index input. ')
+                    'The "parse_chain" option is experimental, and must be used with the "--validator-index" argument with a single validator index input.')
 val_input_group = parser.add_mutually_exclusive_group(required=True)
 val_input_group.add_argument("--validator-index", type=int, nargs='+',
                     help="index(es) of validator for which to regenerate "
