@@ -1,6 +1,6 @@
 # Slashing Protection Recovery
 
-This repository contains a script to recover Eth2 validator slashing protection information in the format defined by [EIP-3076: Validator Client Interchange Format (Slashing Protection)](https://eips.ethereum.org/EIPS/eip-3076).
+This repository contains a script to recover Eth2 validator slashing protection information in the format defined by [EIP-3076: Validator Client Interchange Format (Slashing Protection)](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-3076.md).
 
 :bangbang:**Disclaimer**: *Absolutely no warranties. Use at your own risk.*:bangbang:
 
@@ -17,7 +17,7 @@ This method will make a single entry each in the attestation slashing protection
 - Block Slashing Protection:
   - `slot`: Current slot
 
-This prevents the validator from making attestations in the current epoch, and blocks in the current slot, because of [slashing protection conditions 2, 4, and 5](https://eips.ethereum.org/EIPS/eip-3076#conditions). This may lead to some false positives from the slashing prevention detection component (i.e., messages that are not actually slashable are identified as slashable), but never leads to false negatives. **This means that the validator may possibly lose out on staking rewards for this epoch, but will definitely not experience a slashing penalty.**
+This prevents the validator from making attestations in the current epoch, and blocks in the current slot, because of [slashing protection conditions 2, 4, and 5](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-3076.md#conditions). This may lead to some false positives from the slashing prevention detection component (i.e., messages that are not actually slashable are identified as slashable), but never leads to false negatives. **This means that the validator may possibly lose out on staking rewards for this epoch, but will definitely not experience a slashing penalty.**
 
 #### `parse_chain` (Experimental)
 The method currently only regenerates the attestation component of the slashing protection file. The block protection item will be filled with the current slot.

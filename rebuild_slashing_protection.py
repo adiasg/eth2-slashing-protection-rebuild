@@ -70,7 +70,7 @@ def query_eth2_api(endpoint):
 
 def generate_validator_protection_json(validator_pubkey, att_source_epoch, att_target_epoch, block_slot):
     # Generate a validator protection information item in interchange format version 5
-    # https://eips.ethereum.org/EIPS/eip-3076
+    # https://github.com/ethereum/EIPs/blob/master/EIPS/eip-3076.md#json-schema
     return {
                 "pubkey": validator_pubkey,
                 "signed_blocks": [
@@ -89,7 +89,7 @@ def generate_validator_protection_json(validator_pubkey, att_source_epoch, att_t
 
 def write_protection_file(genesis_validators_root, validator_protection_info):
     # Write the validator protection information items to a protection file in interchange format version 5
-    # https://eips.ethereum.org/EIPS/eip-3076
+    # https://github.com/ethereum/EIPs/blob/master/EIPS/eip-3076.md#json-schema
     protection_file = "protection-file.json"
     protection_data = []
     interchange_json = {
