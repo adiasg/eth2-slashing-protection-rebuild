@@ -295,7 +295,7 @@ def get_signed_attestations(block, head_state, validator_index, committee_cache,
     return signed_attestations
 
 
-def process_chain(head, justified_epoch, processed_blocks, best_attestations_in_chains, validator_index):
+def process_chain(head, justified_epoch, processed_blocks, best_attestations_in_chains, proposal_slots, validator_index):
     logging.info(f"Processing chain from head: {head}")
     head_root = head["root"]
     # The below block header fetching might cause problems sometimes
@@ -314,6 +314,11 @@ def process_chain(head, justified_epoch, processed_blocks, best_attestations_in_
     block = fetch_block(current_block_root)
     while current_block_root not in processed_blocks and block.slot > justified_epoch * SLOTS_PER_EPOCH:
         logging.info(f'Processing Block - Slot: {block.slot}, Root: {current_block_root}')
+
+        if block.proposer_index == validator_index:
+            logging.info(f'Found proposal in current chain: {block}')
+            proposal_slots.append(block.slot)
+
         signed_attestations = get_signed_attestations(block, head_state, validator_index, committee_cache, head)
         if signed_attestations:
             logging.debug(f'Signed attestations in this block: {signed_attestations}')
@@ -357,13 +362,11 @@ if finality_checkpoints_before["current_justified"] != finality_checkpoints["cur
 justified_epoch = int(finality_checkpoints["current_justified"]["epoch"])
 processed_blocks = []
 best_attestations_in_chains = []
+proposal_slots = []
 
 sorted(heads, key=lambda head: int(head["slot"]), reverse=True)
 for head in heads:
-    process_chain(head, justified_epoch, processed_blocks, best_attestations_in_chains, validator_index)
-    best_attestation = max(best_attestations_in_chains, key=lambda att: att.data.target.epoch)
-    if compute_epoch_at_slot(best_attestation.data.slot) > compute_epoch_at_slot(int(head["slot"])):
-        break
+    process_chain(head, justified_epoch, processed_blocks, best_attestations_in_chains, proposal_slots, validator_index)
 
 if best_attestations_in_chains:
     best_attestation = max(best_attestations_in_chains, key=lambda att: att.data.target.epoch)
@@ -375,9 +378,14 @@ else:
     best_attestation.data.target.epoch = justified_epoch
     logging.info(f'Plugging in fake Attestation with Source Epoch: {best_attestation.data.source.epoch}, Target Epoch: {best_attestation.data.target.epoch}')
 
-logging.info("This program does not rebuild block protection history yet. The highest known head slot will be plugged into the block protection component.")
-best_block_slot = heads[0]["slot"]
-logging.info(f'Plugging in fake Block with Slot: {best_block_slot}')
+if proposal_slots:
+    best_block_slot = max(proposal_slots)
+    logging.info(f"Best proposal found with slot: {best_block_slot}")
+else:
+    logging.info("No proposals found for this validator. Using the justified slot instead.")
+    justified_slot = justified_epoch * SLOTS_PER_EPOCH
+    best_block_slot = justified_slot
+    logging.info(f'Plugging in fake Block with Slot: {best_block_slot}')
 
 validator_protection_info = [generate_validator_protection_json(validator_pubkey, best_attestation.data.source.epoch, best_attestation.data.target.epoch, best_block_slot)]
 write_protection_file(genesis_validators_root, validator_protection_info)
