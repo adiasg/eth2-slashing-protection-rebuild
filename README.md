@@ -17,7 +17,7 @@ These assumptions are made for all slashing protection rebuild methods:
 #### 1. `uc_safe` (Safest)
 
 ##### Description
-The `uc_safe` method generates slashing protection information that only allows the validator to make attestations such that `source.epoch >= current_epoch - 1` and `target.epoch > current_epoch`. As compared to the other methods, this method is unconditionally safe (hence the name `uc_safe`) as long as the accurate system time requirement is met. **When used together with the `--validator-pubkey` and `--genesis-info` options, this method is usable without an Eth2 API (recommended).** This method can be use offline when used with the following options: `--method uc_safe --validator_pubkey VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...]`
+The `uc_safe` method generates slashing protection information that only allows the validator to make attestations such that `source.epoch >= current_epoch - 1` and `target.epoch > current_epoch`. As compared to the other methods, this method is unconditionally safe (hence the name `uc_safe`) as long as the accurate system time requirement is met. **When used with `--method uc_safe --validator_pubkey VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...]` options, this method is usable without an Eth2 API (recommended).**
 
 A single entry will be made in each of the attestation slashing protection and block slashing protection items. The entries will be generated in the following manner:
 - Attestation Slashing Protection:
