@@ -185,7 +185,7 @@ else:
 try:
     genesis_validators_root = Root(genesis["genesis_validators_root"])
 except:
-    logging.exception(f'Error while reading "genesis_validators_root". Please make sure that "genesis_validators_root" is a well-formed, "0x"-prefixed, 32-byte root. Exiting program.')
+    logging.exception('Error while reading "genesis_validators_root". Please make sure that "genesis_validators_root" is a well-formed, "0x"-prefixed, 32-byte root. Exiting program.')
     exit(1)
 logging.debug(f'Fetched Genesis information: {genesis}')
 
@@ -348,10 +348,10 @@ finality_checkpoints = query_eth2_api("/eth/v1/beacon/states/head/finality_check
 
 if finality_checkpoints_before["current_justified"] != finality_checkpoints["current_justified"]:
     logging.critical("The current justified block changed while in the middle of fetching data from the Eth2 node. "
-                    f'The old current justified checkpoint was: {finality_checkpoints_before["current_justified"]}, and '
-                    f'the new current justified checkpoint is: {finality_checkpoints["current_justified"]} '
-                    "To safeguard against processing inconsistent data, the program will exit. "
-                    "Try running this script again.")
+                     f'The old current justified checkpoint was: {finality_checkpoints_before["current_justified"]}, and '
+                     f'the new current justified checkpoint is: {finality_checkpoints["current_justified"]} '
+                     "To safeguard against processing inconsistent data, the program will exit. "
+                     "Try running this script again.")
     exit(1)
 
 justified_epoch = int(finality_checkpoints["current_justified"]["epoch"])

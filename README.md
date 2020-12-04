@@ -76,7 +76,7 @@ The slashing protection information is generated in the following way:
   - (Optional) A fully synced Eth2 Beacon Node with an accessible [Eth2 API](https://github.com/ethereum/eth2.0-APIs) endpoint
 - **Installation**:
   1. Verify that the installation will use the correct [Eth2.0 spec version](https://github.com/ethereum/eth2.0-specs/releases) by checking the commit hash in `ETH2_SPEC_COMMIT` in `./Makefile`.
-  2. Use `make install` to install the dependancies in a venv.
+  2. Use `make install` to install the dependencies in a venv.
   3. Activate the venv before executing the utility using `. venv/bin/activate`
 
 ## Usage
@@ -113,7 +113,7 @@ optional arguments:
 The `--method uc_safe` along with genesis information from `genesis.json` is highly recommended. These step-by-step instructions outline the recommended usage:
 
 0. Download this repository using `git clone https://github.com/adiasg/eth2-slashing-protection-rebuild.git`.
-1. Verify that the installation will use the correct [Eth2.0 spec version](https://github.com/ethereum/eth2.0-specs/releases) by checking the commit hash in `ETH2_SPEC_COMMIT` in `./Makefile`.
+1. [Installation](#install): verify that the installation will use the correct [Eth2.0 spec version](https://github.com/ethereum/eth2.0-specs/releases) by checking the commit hash in `ETH2_SPEC_COMMIT` in `./Makefile`. Then run `make install`, followed by `. venv/bin/activate`.
 1. Fill in your validator public key(s) in a `./pubkey.txt` file.
 
     `./pubkey.txt`:
@@ -130,7 +130,7 @@ The `--method uc_safe` along with genesis information from `genesis.json` is hig
       "genesis_validators_root": "0x4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95"
     }
     ```
-3. Run the utility using the recommended options. Remember to follow the [install instructions](#install) and activate the venv using `. venv/bin/activate` before this.
+3. Run the utility using the recommended options. Remember to activate the venv using `. venv/bin/activate` before this.
     ```bash
     python rebuild_slashing_protection.py --genesis-info ./genesis.json --method uc_safe --validator-pubkey-file ./pubkeys.txt
     ```
