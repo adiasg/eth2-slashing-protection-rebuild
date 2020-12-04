@@ -7,7 +7,7 @@ import logging
 import time
 from eth2spec.phase0.spec import (
     SECONDS_PER_SLOT, SLOTS_PER_EPOCH,
-    Attestation, BeaconState, BLSPubkey, SignedBeaconBlock,
+    Attestation, BeaconState, BLSPubkey, Root, SignedBeaconBlock,
     compute_epoch_at_slot, get_beacon_committee
 )
 
@@ -88,8 +88,9 @@ if VAL_PUBKEY_FILE:
         # Make sure that validator pubkeys are well-formed
         try:
             VAL_PUBKEY = list(map(BLSPubkey, raw_val_pubkey))
-        except Exception:
-            logging.exception(f'Error while reading validator pubkey(s) from file: {GENESIS_INFO}. Please ensure that well-formed, "0x"-prefixed pubkeys are entered in a whitespace-separated format.')
+        except:
+            logging.exception(f'Error while reading validator pubkey(s) from file: {GENESIS_INFO}. Please ensure that well-formed, "0x"-prefixed pubkeys are entered in a whitespace-separated format. Exiting program.')
+            exit(1)
         logging.info(f'Reading validator pubkeys from file: {VAL_PUBKEY_FILE}')
         for i in range(len(VAL_PUBKEY)):
             logging.info(f'\tPUBKEY: {VAL_PUBKEY[i]}')
@@ -154,7 +155,7 @@ def write_protection_file(genesis_validators_root, validator_protection_info):
     interchange_json = {
                          "metadata": {
                                 "interchange_format_version": "5",
-                                "genesis_validators_root": genesis_validators_root
+                                "genesis_validators_root": str(genesis_validators_root)
                             },
                          "data": validator_protection_info
                         }
@@ -181,7 +182,11 @@ else:
     # Fetch genesis information from Eth2 API
     logging.info(f'Fetching Genesis information from Eth2 API at {ETH2_API}')
     genesis = query_eth2_api("/eth/v1/beacon/genesis")
-genesis_validators_root = genesis["genesis_validators_root"]
+try:
+    genesis_validators_root = Root(genesis["genesis_validators_root"])
+except:
+    logging.exception(f'Error while reading "genesis_validators_root". Please make sure that "genesis_validators_root" is a well-formed, "0x"-prefixed, 32-byte root. Exiting program.')
+    exit(1)
 logging.debug(f'Fetched Genesis information: {genesis}')
 
 if METHOD in ["uc_safe", "future_only"]:
