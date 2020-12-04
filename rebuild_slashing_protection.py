@@ -7,7 +7,7 @@ import logging
 import time
 from eth2spec.phase0.spec import (
     SECONDS_PER_SLOT, SLOTS_PER_EPOCH,
-    Attestation, BeaconState, SignedBeaconBlock,
+    Attestation, BeaconState, BLSPubkey, SignedBeaconBlock,
     compute_epoch_at_slot, get_beacon_committee
 )
 
@@ -72,12 +72,24 @@ VAL_PUBKEY = args.validator_pubkey
 VAL_PUBKEY_FILE = args.validator_pubkey_file
 OUTPUT_FILE = args.output_file
 
+if VAL_PUBKEY:
+    # Make sure that validator pubkeys are well-formed
+    try:
+        VAL_PUBKEY = list(map(BLSPubkey, VAL_PUBKEY))
+    except Exception:
+        logging.exception(f'Error while reading validator pubkey(s) from command line input: {VAL_PUBKEY}. Please ensure that well-formed, "0x"-prefixed pubkeys are entered in a whitespace-separated format.')
+
 if VAL_PUBKEY_FILE:
     # Read the validator pubkey file and initiaize VAL_PUBKEY
     with open(VAL_PUBKEY_FILE, "r") as val_pubkey_file:
         file_content = val_pubkey_file.read()
         logging.info(f'Fetching validator pubkey(s) from file: {GENESIS_INFO}')
-        VAL_PUBKEY = file_content.strip().split()
+        raw_val_pubkey = file_content.strip().split()
+        # Make sure that validator pubkeys are well-formed
+        try:
+            VAL_PUBKEY = list(map(BLSPubkey, raw_val_pubkey))
+        except Exception:
+            logging.exception(f'Error while reading validator pubkey(s) from file: {GENESIS_INFO}. Please ensure that well-formed, "0x"-prefixed pubkeys are entered in a whitespace-separated format.')
         logging.info(f'Reading validator pubkeys from file: {VAL_PUBKEY_FILE}')
         for i in range(len(VAL_PUBKEY)):
             logging.info(f'\tPUBKEY: {VAL_PUBKEY[i]}')
@@ -120,7 +132,7 @@ def generate_validator_protection_json(validator_pubkey, att_source_epoch, att_t
     # Generate a validator protection information item in interchange format version 5
     # https://github.com/ethereum/EIPs/blob/master/EIPS/eip-3076.md#json-schema
     return {
-                "pubkey": validator_pubkey,
+                "pubkey": str(validator_pubkey),
                 "signed_blocks": [
                     {
                         "slot": str(block_slot),
