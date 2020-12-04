@@ -17,7 +17,7 @@ These assumptions are made for all slashing protection rebuild methods:
 #### 1. `uc_safe` (Safest)
 
 ##### Description
-The `uc_safe` method generates slashing protection information that only allows the validator to make attestations such that `source.epoch >= current_epoch - 1` and `target.epoch > current_epoch`. As compared to the other methods, this method is unconditionally safe (hence the name `uc_safe`) as long as the accurate system time requirement is met. **When used together with the `--validator-pubkey` and `--genesis-info` options, this method is usable without an Eth2 API.** This method can be use offline when used with the following options: ""--method uc_safe --validator_pubkey VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...]""
+The `uc_safe` method generates slashing protection information that only allows the validator to make attestations such that `source.epoch >= current_epoch - 1` and `target.epoch > current_epoch`. As compared to the other methods, this method is unconditionally safe (hence the name `uc_safe`) as long as the accurate system time requirement is met. **When used together with the `--validator-pubkey` and `--genesis-info` options, this method is usable without an Eth2 API (recommended).** This method can be use offline when used with the following options: `--method uc_safe --validator_pubkey VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...]`
 
 A single entry will be made in each of the attestation slashing protection and block slashing protection items. The entries will be generated in the following manner:
 - Attestation Slashing Protection:
@@ -73,10 +73,11 @@ The slashing protection information is generated in the following way:
 
 - **Prerequisites**:
   - Python 3
-  - A fully synced Eth2 Beacon Node with an accessible [Eth2 API](https://github.com/ethereum/eth2.0-APIs) endpoint
+  - (Optional) A fully synced Eth2 Beacon Node with an accessible [Eth2 API](https://github.com/ethereum/eth2.0-APIs) endpoint
 - **Installation**:
-  1. Use `make install` to install the dependancies in a venv.
-  2. Activate the venv before executing the utility using `. venv/bin/activate`
+  1. Verify that the installation will use the correct [Eth2.0 spec version](https://github.com/ethereum/eth2.0-specs/releases) by checking the commit hash in `ETH2_SPEC_COMMIT` in `./Makefile`.
+  2. Use `make install` to install the dependancies in a venv.
+  3. Activate the venv before executing the utility using `. venv/bin/activate`
 
 ## Usage
 ```
@@ -109,20 +110,20 @@ optional arguments:
 
 ### Recommended Usage
 
-Using `--method uc_safe` is highly recommended. These step-by-step instructions can be used for the recommended usage:
+The `--method uc_safe` along with genesis information from `genesis.json` is highly recommended. These step-by-step instructions outline the recommended usage:
 
 0. Download this repository using `git clone https://github.com/adiasg/eth2-slashing-protection-rebuild.git`.
 1. Verify that the installation will use the correct [Eth2.0 spec version](https://github.com/ethereum/eth2.0-specs/releases) by checking the commit hash in `ETH2_SPEC_COMMIT` in `./Makefile`.
 1. Fill in your validator public key(s) in a `./pubkey.txt` file.
 
-    `pubkey.txt`
+    `./pubkey.txt`:
     ```
     0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
     0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
     ```
 2. Verify that `genesis.json` contains the correct `"genesis_time"` and `"genesis_validators_root"` for the Eth2.0 mainnet. These values can be checked against your beacon node's HTTP API at the `/eth/v1/beacon/genesis` endpoint or some other trusted source.
 
-    `genesis.json`
+    `./genesis.json`:
     ```
     {
       "genesis_time": "1606824023",
@@ -136,7 +137,7 @@ Using `--method uc_safe` is highly recommended. These step-by-step instructions 
 
     This should produce an output file `protection-file.json`.
 
-    `protection-file.json`
+    `./protection-file.json`:
     ```
     {
       "metadata": {
