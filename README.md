@@ -14,10 +14,10 @@ These assumptions are made for all slashing protection rebuild methods:
 
 ### Slashing Protection Rebuild Methods
 
-#### 1. `uc_safe` (Safest)
+#### 1. `uc_safe` (Safe)
 
 ##### Description
-The `uc_safe` method generates slashing protection information that only allows the validator to make attestations such that `source.epoch >= current_epoch - 1` and `target.epoch > current_epoch`. As compared to the other methods, this method is unconditionally safe (hence the name `uc_safe`) as long as the accurate system time requirement is met. **When used with `--validator_pubkey` or `--validator-pubkey-file` options, this method is usable without an Eth2 API (recommended).**
+The `uc_safe` method generates slashing protection information that only allows the validator to make attestations such that `source.epoch >= current_epoch - 1` and `target.epoch > current_epoch`. As compared to the other methods, this method is unconditionally safe (hence the name `uc_safe`) as long as the accurate system time requirement is met. **When used with `--validator_pubkey` or `--validator-pubkey-file` options, this method is usable without an Eth2 API ([recommended](#recommended-usage)).**
 
 A single entry will be made in each of the attestation slashing protection and block slashing protection items. The entries will be generated in the following manner:
 - Attestation Slashing Protection:
@@ -33,7 +33,7 @@ This may lead to some false positives from the slashing prevention detection com
 
 Further, if the Eth2 network does not produce new justified blocks, the validator will remain offline. Notably, if a large fraction (`> 1/3`rd) of validators are offline, a validator using a slashing protection file produced by this method will remain offline until the network recovers.
 
-#### 2. `future_only` (Safe)
+#### 2. `future_only`
 
 ##### Specific Assumptions
 - The beacon node providing the Eth2 API is fully synced.
@@ -53,20 +53,6 @@ This prevents the validator from making attestations in the current epoch, and b
 ##### Validator Activity Implications
 This may lead to some false positives from the slashing prevention detection component (i.e., messages that are not actually slashable are identified as slashable). **The validator *WILL* lose out on rewards because of inactivity in the current epoch.**
 
-#### 3. `parse_chain` (Experimental)
-
-##### Specific Assumptions
-- The beacon node providing the Eth2 API is fully synced.
-- The current justified checkpoint epoch never decreases.
-
-##### Description
-The method currently only regenerates the attestation component of the slashing protection file. The block protection item will be filled with the current slot. The purpose of this method is to avoid any false positives from the slashing prevention detection component.
-
-The slashing protection information is generated in the following way:
-- Parse entire subtree descending from last justified block
-- If signed attestations are present, then identify the attestation with the *largest target epoch* that the validator has signed. Then use the source epoch and target epoch values from that attestation to make a single entry in the `"signed_attestations"` field of the slashing protection file.
-- If no signed attestations are found in this subtree, make a single entry in the `"signed_attestations"` field of the slashing protection file with `"source_epoch"` and `"target_epoch"` set to the current justified epoch.
-
 ---
 
 ## Install
@@ -81,9 +67,10 @@ The slashing protection information is generated in the following way:
 
 ## Usage
 ```
-usage: rebuild_slashing_protection.py [-h] (--eth2-api ETH2_API | --genesis-info GENESIS_INFO) --method {uc_safe,future_only,parse_chain}
-                                      (--validator-index VALIDATOR_INDEX [VALIDATOR_INDEX ...] | --validator-pubkey VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...] | --validator-pubkey-file VALIDATOR_PUBKEY_FILE) [--output-file OUTPUT_FILE]
-                                      [--log-level {debug,info,warn}]
+usage: rebuild_slashing_protection.py [-h] (--eth2-api ETH2_API | --genesis-info GENESIS_INFO) --method
+                                      {uc_safe,future_only}
+                                      (--validator-pubkey VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...] | --validator-pubkey-file VALIDATOR_PUBKEY_FILE)
+                                      [--output-file OUTPUT_FILE] [--log-level {debug,info,warn}]
 
 Utility to rebuild Eth2 validator slashing protection information
 
@@ -91,16 +78,16 @@ optional arguments:
   -h, --help            show this help message and exit
   --eth2-api ETH2_API   Eth2 API to fetch Beacon Chain information from
   --genesis-info GENESIS_INFO
-                        file containing genesis information to use in the absence of an Eth2 API. Can only be used with the following options: "--genesis-info GENESIS_INFO --method uc_safe (--validator_pubkey VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...] |
-                        --validator-pubkey-file VALIDATOR_PUBKEY_FILE"
-  --method {uc_safe,future_only,parse_chain}
-                        method used to rebuild the slashing protection information. The "parse_chain" option is experimental, and must be used with argument "--validator-index VALIDATOR_INDEX" (a single validator index input).
-  --validator-index VALIDATOR_INDEX [VALIDATOR_INDEX ...]
-                        index(es) of validator(s) for which to regenerate slashing protection information
+                        file containing genesis information to use in the absence of an Eth2 API. Can only be used with the
+                        following options: "--genesis-info GENESIS_INFO --method uc_safe (--validator_pubkey
+                        VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...] | --validator-pubkey-file VALIDATOR_PUBKEY_FILE"
+  --method {uc_safe,future_only}
+                        method used to rebuild the slashing protection information.
   --validator-pubkey VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...]
                         pubkey(s) of validator(s) for which to regenerate slashing protection information
   --validator-pubkey-file VALIDATOR_PUBKEY_FILE
-                        file containing whitespace-separated pubkey(s) of validator(s) for which to regenerate slashing protection information. The default output file is "protection-file.json"
+                        file containing whitespace-separated pubkey(s) of validator(s) for which to regenerate slashing
+                        protection information. The default output file is "protection-file.json"
   --output-file OUTPUT_FILE
                         output file for slashing protection information
   --log-level {debug,info,warn}
