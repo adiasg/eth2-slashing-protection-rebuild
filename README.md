@@ -29,7 +29,7 @@ A single entry will be made in each of the attestation slashing protection and b
 These entries prevent the validator from making attestations until the justified epoch is at least `current_epoch - 1`, and from proposing blocks in the current slot, because of [slashing protection conditions 2, 4, and 5](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-3076.md#conditions).
 
 ##### Validator Activity Implications
-This may lead to some false positives from the slashing prevention detection component (i.e., messages that are not actually slashable are identified as slashable). However, **the validator *WILL* lose out on rewards because of inactivity in *at least* the current epoch.**
+This may lead to some false positives from the slashing prevention detection component (i.e., messages that are not actually slashable are identified as slashable). **The validator *WILL* lose out on rewards because of inactivity in *AT LEAST* the current epoch.**
 
 Further, if the Eth2 network does not produce new justified blocks, the validator will remain offline. Notably, if a large fraction (`> 1/3`rd) of validators are offline, a validator using a slashing protection file produced by this method will remain offline until the network recovers.
 
@@ -51,7 +51,7 @@ A single entry will be made in each of the attestation slashing protection and b
 This prevents the validator from making attestations in the current epoch, and blocks in the current slot, because of [slashing protection conditions 2, 4, and 5](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-3076.md#conditions).
 
 ##### Validator Activity Implications
-This may lead to some false positives from the slashing prevention detection component (i.e., messages that are not actually slashable are identified as slashable). However, **the validator *MAY* lose out on rewards because of inactivity in this epoch .**
+This may lead to some false positives from the slashing prevention detection component (i.e., messages that are not actually slashable are identified as slashable). **The validator *WILL* lose out on rewards because of inactivity in the current epoch.**
 
 #### 3. `parse_chain` (Experimental)
 
