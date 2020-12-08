@@ -78,21 +78,18 @@ optional arguments:
   -h, --help            show this help message and exit
   --eth2-api ETH2_API   Eth2 API to fetch Beacon Chain information from
   --genesis-info GENESIS_INFO
-                        file containing genesis information to use in the absence of an Eth2 API. Can only be used with the
-                        following options: "--genesis-info GENESIS_INFO --method uc_safe (--validator_pubkey
-                        VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...] | --validator-pubkey-file VALIDATOR_PUBKEY_FILE"
+                        file containing genesis information to use in the absence of an Eth2 API
   --method {uc_safe,future_only}
-                        method used to rebuild the slashing protection information.
+                        method used to rebuild the slashing protection information
   --validator-pubkey VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...]
                         pubkey(s) of validator(s) for which to regenerate slashing protection information
   --validator-pubkey-file VALIDATOR_PUBKEY_FILE
                         file containing whitespace-separated pubkey(s) of validator(s) for which to regenerate slashing
-                        protection information. The default output file is "protection-file.json"
+                        protection information
   --output-file OUTPUT_FILE
-                        output file for slashing protection information
+                        output file for slashing protection information (default: "protection-file.json")
   --log-level {debug,info,warn}
                         preferred log level
-
 ```
 
 ### Recommended Usage

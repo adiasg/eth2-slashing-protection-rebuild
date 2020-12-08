@@ -6,9 +6,9 @@ import json
 import logging
 import time
 from eth2spec.phase0.spec import (
-    SECONDS_PER_SLOT, SLOTS_PER_EPOCH,
-    Attestation, BeaconState, BLSPubkey, Root, SignedBeaconBlock,
-    compute_epoch_at_slot, get_beacon_committee
+    SECONDS_PER_SLOT,
+    BLSPubkey, Root,
+    compute_epoch_at_slot
 )
 
 # Define command line options
@@ -20,17 +20,11 @@ chain_info_group.add_argument("--eth2-api", type=str,
                               " from")
 chain_info_group.add_argument("--genesis-info", type=str,
                               help='file containing genesis information to use'
-                                   ' in the absence of an Eth2 API. Can only '
-                                   'be used with the following options: '
-                                   '"--genesis-info GENESIS_INFO --method '
-                                   'uc_safe (--validator_pubkey '
-                                   'VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...] | '
-                                   '--validator-pubkey-file '
-                                   'VALIDATOR_PUBKEY_FILE"')
+                                   ' in the absence of an Eth2 API')
 parser.add_argument("--method", type=str, required=True,
                     choices=["uc_safe", "future_only"],
                     help='method used to rebuild the slashing protection '
-                    'information.')
+                    'information')
 val_input_group = parser.add_mutually_exclusive_group(required=True)
 val_input_group.add_argument("--validator-pubkey", type=str, nargs='+',
                              help="pubkey(s) of validator(s) for which to "
@@ -38,11 +32,11 @@ val_input_group.add_argument("--validator-pubkey", type=str, nargs='+',
 val_input_group.add_argument("--validator-pubkey-file", type=str,
                              help='file containing whitespace-separated '
                              'pubkey(s) of validator(s) for which to '
-                             'regenerate slashing protection information. The '
-                             'default output file is "protection-file.json"')
+                             'regenerate slashing protection information')
 parser.add_argument("--output-file", type=str, required=False,
                     default="protection-file.json",
-                    help="output file for slashing protection information")
+                    help="output file for slashing protection information "
+                    '(default: "protection-file.json")')
 parser.add_argument("--log-level", type=str, required=False, default="info",
                     choices=["debug", "info", "warn"],
                     help="preferred log level")
@@ -91,14 +85,7 @@ if VAL_PUBKEY_FILE:
 
 OFFLINE_MODE = False
 if ETH2_API is None:
-    if METHOD != "uc_safe" or not GENESIS_INFO or not VAL_PUBKEY:
-        parser.error('Argument "--eth2-api ETH2_API" can be missing only when '
-                     'using the following options: "--genesis-info '
-                     'GENESIS_INFO --method uc_safe (--validator_pubkey '
-                     'VALIDATOR_PUBKEY [VALIDATOR_PUBKEY ...] | '
-                     '--validator-pubkey-file VALIDATOR_PUBKEY_FILE"')
-    else:
-        OFFLINE_MODE = True
+    OFFLINE_MODE = True
 
 
 def query_eth2_api(endpoint):
