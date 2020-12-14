@@ -316,7 +316,7 @@ def process_chain(head, justified_epoch, processed_blocks, best_attestations_in_
         logging.info(f'Processing Block - Slot: {block.slot}, Root: {current_block_root}')
 
         if block.proposer_index == validator_index:
-            logging.info(f'Found proposal in current chain: {block}')
+            logging.info(f'Found proposal in current chain - Block - Slot: {block.slot}, Root: {current_block_root}')
             proposal_slots.append(block.slot)
 
         signed_attestations = get_signed_attestations(block, head_state, validator_index, committee_cache, head)
