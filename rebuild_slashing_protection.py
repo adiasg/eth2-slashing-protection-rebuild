@@ -382,9 +382,11 @@ if proposal_slots:
     best_block_slot = max(proposal_slots)
     logging.info(f"Best proposal found with slot: {best_block_slot}")
 else:
-    logging.info("No proposals found for this validator. Using the justified slot instead.")
-    justified_slot = justified_epoch * SLOTS_PER_EPOCH
-    best_block_slot = justified_slot
+    genesis_time = int(genesis["genesis_time"])
+    current_time = int(time.time())
+    current_slot = (current_time - genesis_time) // SECONDS_PER_SLOT
+    logging.info("No proposals found for this validator. Using the current slot instead - Slot: {current_slot}.")
+    best_block_slot = current_slot
     logging.info(f'Plugging in fake Block with Slot: {best_block_slot}')
 
 validator_protection_info = [generate_validator_protection_json(validator_pubkey, best_attestation.data.source.epoch, best_attestation.data.target.epoch, best_block_slot)]
