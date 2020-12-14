@@ -63,7 +63,7 @@ The slashing protection information is generated in the following way:
 - If signed attestations are present, then identify the attestation with the *largest target epoch* that the validator has signed. Then use the source epoch and target epoch values from that attestation to make a single entry in the `"signed_attestations"` field of the slashing protection file.
 - If no signed attestations are found in this subtree, make a single entry in the `"signed_attestations"` field of the slashing protection file with `"source_epoch"` and `"target_epoch"` set to the current justified epoch.
 - If a block is present that was proposed by the validator under consideration, use the slot of this block to make a single entry in the `"signed_blocks"` field of the slashing protection file.
-- If a block is not found, make a single entry in the `"signed_blocks"` field of the slashing protection file with `"slot"` set to the beginning slot of the current justified epoch.
+- If a block is not found, make a single entry in the `"signed_blocks"` field of the slashing protection file with `"slot"` set to the current slot.
 
 ---
 
