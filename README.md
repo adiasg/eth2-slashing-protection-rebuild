@@ -50,22 +50,20 @@ A single entry will be made in each of the attestation slashing protection and b
 
 This prevents the validator from making attestations in the current epoch, and blocks in the current slot, because of [slashing protection conditions 2, 4, and 5](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-3076.md#conditions).
 
-##### Validator Activity Implications
-This may lead to some false positives from the slashing prevention detection component (i.e., messages that are not actually slashable are identified as slashable). **The validator *WILL* lose out on rewards because of inactivity in the current epoch.**
-
 #### 3. `parse_chain` (Experimental)
+This method regenerates the block and attestation component of the slashing protection file based on what is currently available in the block tree.
 
 ##### Specific Assumptions
 - The beacon node providing the Eth2 API is fully synced.
 - The current justified checkpoint epoch never decreases.
 
 ##### Description
-The method currently only regenerates the attestation component of the slashing protection file. The block protection item will be filled with the current slot. The purpose of this method is to avoid any false positives from the slashing prevention detection component.
-
 The slashing protection information is generated in the following way:
 - Parse entire subtree descending from last justified block
 - If signed attestations are present, then identify the attestation with the *largest target epoch* that the validator has signed. Then use the source epoch and target epoch values from that attestation to make a single entry in the `"signed_attestations"` field of the slashing protection file.
 - If no signed attestations are found in this subtree, make a single entry in the `"signed_attestations"` field of the slashing protection file with `"source_epoch"` and `"target_epoch"` set to the current justified epoch.
+- If a block is present that was proposed by the validator under consideration, use the slot of this block to make a single entry in the `"signed_blocks"` field of the slashing protection file.
+- If a block is not found, make a single entry in the `"signed_blocks"` field of the slashing protection file with `"slot"` set to the current slot.
 
 ---
 
